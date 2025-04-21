@@ -31,7 +31,7 @@
                         <span class="font-bold">Website:</span>
                         <Button link @click="openSite(tokenDetail.website)" :label="tokenDetail.website"></Button>
                     </div>
-                    <div v-if="tokenDetail.socials" class="flex justify-between items-center">
+                    <div v-if="hasSocialLinks()" class="flex justify-between items-center">
                         <span class="font-bold">Socials:</span>
                         <div class="inline-flex gap-2">
                             <Button v-if="tokenDetail.socials.telegram" text icon="pi pi-telegram"
@@ -212,6 +212,14 @@ async function getTokenDetail() {
     }
 }
 
+function hasSocialLinks() {
+    if (tokenDetail.socials instanceof Array) {
+        return tokenDetail.socials.length > 0;
+    } else {
+        return Object.keys(tokenDetail.socials).length > 0;
+    }
+}
+
 function parseSocial() {
     let social = {};
     tokenDetail.socials.forEach(it => {
@@ -225,7 +233,9 @@ function parseSocial() {
             social.youtube = it;
         }
     });
-    tokenDetail.socials = social;
+    if (Object.keys(social).length > 0) {
+        tokenDetail.socials = social;
+    }
 }
 
 async function doTransfer() {
