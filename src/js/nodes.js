@@ -71,8 +71,7 @@ function saveHyperion(id) {
 }
 
 function saveNode(id) {
-    let node = listNodes[id];
-    endpoint = node.url;
+    endpoint = listNodes[id].url;
     localStorage.setItem(VEX_RPC, id);
 }
 

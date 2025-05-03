@@ -1,31 +1,31 @@
 <template>
     <div id="newborn" class="p-2">
 
-        <Card v-if="ready" class="drop-shadow md:w-2/3 md:mx-auto">
-            <template #title>Newborn</template>
-            <template #content>
-                <DataTable :value="newborn" size="small" resizable-columns scrollable scroll-height="500px">
-                    <Column header="Account">
-                        <template #body="{data}">
-                            <Button link as="router-link" :to="`/account/${getName(data.data)}`">{{
-                                    getName(data.data)
-                                }}
-                            </Button>
-                        </template>
-                    </Column>
-                    <Column header="Creator">
-                        <template #body="{data}">
-                            <Button link as="router-link" :to="`/account/${data.data.creator}`">{{
-                                    data.data.creator
-                                }}
-                            </Button>
-                        </template>
-                    </Column>
-                    <Column header="Time"
-                            :field="it => DateTime.fromISO(it.timestamp + 'Z').toRelative()"></Column>
-                </DataTable>
-            </template>
-        </Card>
+        <div v-if="ready" class="border rounded-md shadow-md border-surface p-1 md:w-2/3 mx-auto">
+            <DataTable :value="newborn" size="small" resizable-columns scrollable scroll-height="500px">
+                <template #header>
+                    <span class="font-bold text-lg">Newborn</span>
+                </template>
+                <Column header="Account">
+                    <template #body="{data}">
+                        <Button link as="router-link" :to="`/account/${getName(data.data)}`">{{
+                                getName(data.data)
+                            }}
+                        </Button>
+                    </template>
+                </Column>
+                <Column header="Creator">
+                    <template #body="{data}">
+                        <Button link as="router-link" :to="`/account/${data.data.creator}`">{{
+                                data.data.creator
+                            }}
+                        </Button>
+                    </template>
+                </Column>
+                <Column header="Time"
+                        :field="it => DateTime.fromISO(it.timestamp + 'Z').toRelative()"></Column>
+            </DataTable>
+        </div>
         <div v-else class="flex h-screen w-screen">
             <div class="m-auto">
                 <ProgressSpinner stroke-width="5"></ProgressSpinner>

@@ -3,7 +3,7 @@
         <Toolbar class="shadow-lg rounded-b-2xl! rounded-t-none! fixed top-0 z-10 w-full">
             <template #start>
                 <Button icon="pi pi-bars" @click="state.drawer = true"></Button>
-                <span class="text-2xl mx-2">Karmila</span>
+                <span class="text-2xl font-bold mx-2">Karmila</span>
             </template>
             <template #end>
                 <div class="max-sm:hidden flex gap-2">
