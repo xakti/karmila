@@ -18,8 +18,8 @@
                             <div class="inline-flex gap-2 items-center">
                                 <RadioButton @update:model-value="onNode" v-model="node" name="node" :value="key"/>
                                 {{ it.name }}
-                                <Tag v-if="it.hyperion" value="hyperion" style="cursor: pointer"
-                                     @click="setHyperion(key)"></Tag>
+                                <Tag v-if="it.hyperion" value="hyperion" class="cursor-pointer select-none"
+                                  :icon="isCurrentHyperion(key)" @click="setHyperion(key)"></Tag>
                             </div>
                             <span>{{ it.speed }}</span>
                         </div>
@@ -34,17 +34,27 @@
 import {onActivated, ref} from "vue";
 import {useToast} from "primevue";
 import {onBeforeRouteLeave} from "vue-router";
-import {getSelectedNode, initWharfkit, listNodes, pingAllNodes, saveHyperion, saveNode} from "../js/nodes.js";
-import {startInterval} from "../js/utils.js";
+import {
+    getSelectedHyperion,
+    getSelectedNode,
+    initWharfkit,
+    listNodes,
+    pingAllNodes,
+    saveHyperion,
+    saveNode
+} from "@/js/nodes.js";
+import {startInterval} from "@/js/utils.js";
 
 const toast = useToast();
 const dark = ref(false);
 const node = ref();
+const hyperionNode = ref();
 let stopPing = null;
 
 onActivated(() => {
     pingAllNodes();
     node.value = getSelectedNode();
+    hyperionNode.value  = getSelectedHyperion();
 
     let isDark = localStorage.getItem("dark-mode");
     if (isDark) {
@@ -61,9 +71,13 @@ onBeforeRouteLeave(() => {
 });
 
 function setHyperion(id) {
-    let name = listNodes[id].name;
+    hyperionNode.value = id;
     saveHyperion(id);
-    toast.add({life: 3000, severity: "info", summary: "Hyperion Node", detail: `you select ${name}`});
+}
+
+function isCurrentHyperion(key) {
+    if (key === hyperionNode.value) return "pi pi-check";
+    return "";
 }
 
 function onDark() {
@@ -77,6 +91,7 @@ function onDark() {
         document.documentElement.classList.toggle('ui-dark');
     }, 400);
 }
+
 function onNode(val) {
     node.value = val;
 }
