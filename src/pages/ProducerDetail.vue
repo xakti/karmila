@@ -1,16 +1,16 @@
 <template>
     <div id="producer-detail" class="p-2">
 
-        <template v-if="producer.owner.length > 0">
+        <template v-if="producerReady">
             <Card class="drop-shadow md:w-1/2 md:mx-auto">
                 <template #content>
-                    <div v-if="producer.compliance.count > 0" class="flex flex-nowrap gap-2 items-center">
-                        <img v-if="producer.logo" :src="producer.logo" alt="BP" width="64">
+                    <div v-if="producer.compliance.count > 0" class="flex flex-row gap-2 items-center">
+                        <img :src="producer.logo.value" alt="" width="64">
                         <div class="flex flex-col">
                             <router-link :to="`/account/${route.params.name}`">
                                 {{ route.params.name }}
                             </router-link>
-                            <span class="font-bold text-2xl">{{ bpJson.org.candidate_name }}</span>
+                            <span class="font-bold text-2xl">{{ producer.json.org.candidate_name }}</span>
                         </div>
                     </div>
                     <div v-else class="flex flex-nowrap gap-2 items-center">
@@ -24,22 +24,22 @@
                             <span class="font-bold">Website:</span>
                             <a :href="producer.url" target="_blank">{{ producer.url }}</a>
                         </div>
-                        <div v-if="bpJson.org.email" class="flex justify-between">
+                        <div v-if="producer.email" class="flex justify-between">
                             <span class="font-bold">Email:</span>
-                            <a :href="`mailto:${bpJson.org.email}`" target="_blank">{{ bpJson.org.email }}</a>
+                            <a :href="`mailto:${producer.email}`" target="_blank">{{ producer.email }}</a>
                         </div>
                         <div class="flex justify-between">
                             <span class="font-bold">Location:</span>
-                            <span>{{ bpJson.org.location.name }} {{ getFlagEmoji(bpJson.org.location.country) }}</span>
+                            <span>{{ producer.location.name }} {{ getFlagEmoji(producer.location.country) }}</span>
                         </div>
                         <div class="flex gap-2 justify-center mt-2">
-                            <a :href="`https://github.com/${bpJson.org.social.github}`" target="_blank">
+                            <a :href="`https://github.com/${producer.social.github}`" target="_blank">
                                 <i class="pi pi-github" style="font-size: 1.5rem"/></a>
-                            <a :href="`https://t.me/${bpJson.org.social.telegram}`" target="_blank">
+                            <a :href="`https://t.me/${producer.social.telegram}`" target="_blank">
                                 <i class="pi pi-telegram" style="font-size: 1.5rem"/></a>
-                            <a :href="`https://x.com/${bpJson.org.social.twitter}`" target="_blank">
+                            <a :href="`https://x.com/${producer.social.twitter}`" target="_blank">
                                 <i class="pi pi-twitter" style="font-size: 1.5rem"/></a>
-                            <a :href="`https://youtube.com/${bpJson.org.social.youtube}`" target="_blank">
+                            <a :href="`https://youtube.com/${producer.social.youtube}`" target="_blank">
                                 <i class="pi pi-youtube" style="font-size: 1.5rem"/></a>
                         </div>
                     </div>
@@ -58,7 +58,7 @@
                     </div>
                     <div class="flex justify-between">
                         <span class="font-bold">Last Claim:</span>
-                        <span>{{ DateTime.fromISO(producer.last_claim_time + 'Z').toRelative() }}</span>
+                        <span>{{ producer.lastClaim.toRelative() }}</span>
                     </div>
                     <Fieldset legend="Compliance">
                         <div class="grid grid-cols-3 gap-2">
@@ -76,11 +76,12 @@
             </Card>
         </template>
 
-        <Card v-if="bpJson.nodes.length > 0" class="drop-shadow md:w-1/2 md:mx-auto mt-2">
+        <Card v-if="producerReady.value && producer.json.nodes.length > 0" class="drop-shadow md:w-1/2 md:mx-auto mt-2">
             <template #title>Nodes</template>
             <template #content>
                 <div class="flex flex-wrap gap-2 justify-center">
-                    <div v-for="(it,n) in bpJson.nodes" :key="n" class="border rounded-xl flex flex-col p-2 shadow">
+                    <div v-for="(it,n) in producer.json.nodes" :key="n"
+                         class="border rounded-xl flex flex-col p-2 shadow">
                         <span class="font-bold text-lg text-center">{{ capitalizeFirstLetter(it.node_type) }}</span>
                         <span v-if="it.api_endpoint">API: <a :href="it.api_endpoint" target="_blank">{{
                                 it.api_endpoint
@@ -125,68 +126,40 @@
 </template>
 
 <script setup>
-import {onBeforeRouteLeave, useRoute, useRouter} from "vue-router";
+import {useRoute, useRouter} from "vue-router";
 import {onActivated, reactive, ref} from "vue";
 import {useToast} from "primevue";
-import {DateTime} from "luxon";
 import {PlaceholderName} from "@wharfkit/signing-request";
-import {contractKit} from "../js/nodes.js";
-import ChainInfo from "../js/chain-info.js";
-import Wallet from "../js/wallet.js";
-import {fetchBPJson, fetchProducers, fetchVoters, getCompliance} from "../js/producer.js";
-import {capitalizeFirstLetter, copyToClipboard, getFlagEmoji} from "../js/utils.js";
+import {abiCache} from "../js/nodes.js";
+import ChainInfo from "@/js/chain-info.js";
+import Wallet from "@/js/wallet.js";
+import {fetchProducers, fetchVoters} from "@/js/producer.js";
+import {capitalizeFirstLetter, copyToClipboard, getFlagEmoji} from "@/js/utils.js";
+import {Action} from "@wharfkit/antelope";
 
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
-const producer = reactive({owner: ""});
-const bpJson = reactive({
-    org: {
-        candidate_name: "", email: "",
-        location: {
-            name: "Indonesia",
-            country: "ID",
-        },
-        social: {
-            github: "",
-            telegram: "",
-            twitter: "",
-            youtube: "",
-        }
-    },
-    nodes: []
-});
+let producer = null;
+const producerReady = ref(false);
 const voters = ref([]);
 const votersQuery = reactive({skip: 40, loading: false});
 const loading = ref(false);
 const scroll = ref();
 
 onActivated(async () => {
+    producerReady.value = false;
     await ChainInfo.fetchVexcoreGlobal();
     loadProducer();
-    if (producer.owner !== route.params.name) loadVoters();
-});
-
-onBeforeRouteLeave(() => {
-    bpJson.org.candidate_name = "";
-    bpJson.org.email = "";
-    bpJson.nodes = [];
+    if (producer && producer.owner !== route.params.name) loadVoters();
 });
 
 async function loadProducer() {
     let res = await fetchProducers(route.params.name, 1);
     if (res.rows.length > 0) {
-        let data = res.rows[0];
-        Object.assign(producer, data);
-        producer.compliance = getCompliance(null);
-
-        if (producer.url.length > 0) {
-            fetchBPJson(producer.url).then(json => {
-                Object.assign(bpJson, json);
-                producer.logo = json.org.branding.logo_256;
-                producer.compliance = getCompliance(json);
-            });
-        }
+        producer = res.rows[0];
+        producer.fetchBPJson();
+        producerReady.value = true;
     } else {
         toast.add({severity: "info", life: 3000, summary: "Not Found", detail: "account not registered as producer"});
     }
@@ -219,20 +192,29 @@ async function moreVoters() {
 }
 
 async function createVoteVSR() {
-    const sc = await contractKit.load("vexcore");
-    let action = sc.action("voteproducer", {
-        voter: PlaceholderName, proxy: "", producers: [producer.owner]
-    });
-    let sr = await Wallet.createSigningRequest({action});
-    return sr.encode(true, false, "vsr:");
+    const abi = await abiCache.getAbi("vexcore");
+    const action = Action.from({
+        account: "vexcore", name: "voteproducer", authorization: [],
+        data: {
+            voter: PlaceholderName, proxy: "", producers: [producer.owner]
+        }
+    }, abi);
+    const request = await Wallet.createSigningRequest({action});
+    return request.encode(true, false, "vsr:");
 }
 
 async function voteVSR() {
     try {
         let vsr = await createVoteVSR();
-        copyToClipboard(vsr);
-
-        toast.add({severity: "success", life: 3000, summary: "Vote Producer", detail: "vsr copied"});
+        let msg;
+        if (Wallet.isConnected()) {
+            await Wallet.session.signingRequest(vsr);
+            msg = "thank you";
+        } else {
+            copyToClipboard(vsr);
+            msg = "vsr copied";
+        }
+        toast.add({severity: "success", life: 3000, summary: "Vote Producer", detail: msg});
     } catch (e) {
         toast.add({severity: "error", life: 3000, summary: "Vote Failed", detail: e.message});
     }

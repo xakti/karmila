@@ -7,7 +7,7 @@
 
         <div v-if="producers.rows.length > 0" class="border rounded-md border-surface shadow-md p-1 m-2">
             <DataTable :value="producers.rows" v-model:selection="selectedProducers" data-key="owner"
-                      size="small" resizable-columns scrollable scroll-height="550px">
+                       size="small" resizable-columns column-resize-mode="expand" scrollable scroll-height="550px">
                 <template #footer>
                     <div class="flex justify-center gap-2">
                         <FloatLabel variant="in">
@@ -19,10 +19,10 @@
                     </div>
                 </template>
 
-                <Column header="Rank" field="pos"></Column>
-                <Column header="Name" header-class="">
+                <Column header="Rank" field="position"></Column>
+                <Column header="Name">
                     <template #body="{data}">
-                        <div class="inline-flex gap-2 items-center">
+                        <div class="inline-flex gap-2 items-center min-w-[150px]">
                             <img v-if="data.logo" :src="data.logo" alt="" width="32"/>
                             <router-link :to="`/producer/${data.owner}`">
                                 {{ data.owner }}
@@ -47,7 +47,7 @@
                     </template>
                 </Column>
                 <Column header="Last Claim"
-                        :field="it=> DateTime.fromISO(`${it.last_claim_time}Z`).toRelative()"></Column>
+                        :field="it => it.lastClaim.toRelative()"></Column>
                 <Column selectionMode="multiple"></Column>
             </DataTable>
         </div>
@@ -64,15 +64,14 @@
 import {useToast} from "primevue";
 import {onActivated, reactive, ref} from "vue";
 import {onBeforeRouteLeave, useRouter} from "vue-router";
-import {Asset} from "@wharfkit/antelope";
-import {PlaceholderName} from "@wharfkit/signing-request";
-import {DateTime} from "luxon";
-import {client, contractKit} from "../js/nodes.js";
-import ChainInfo from "../js/chain-info.js";
-import {copyToClipboard, startInterval} from "../js/utils.js";
-import {producers, fetchProducers, fetchBPJson} from "../js/producer.js";
-import {suggestions, completeProducer} from "../js/auto.js";
-import Wallet from "../js/wallet.js";
+import {Action, Asset} from "@wharfkit/antelope";
+import {PlaceholderAuth, PlaceholderName} from "@wharfkit/signing-request";
+import {abiCache, client} from "@/js/nodes.js";
+import ChainInfo from "@/js/chain-info.js";
+import {copyToClipboard, startInterval} from "@/js/utils.js";
+import {fetchProducers, producers} from "@/js/producer.js";
+import {completeProducer, suggestions} from "@/js/auto.js";
+import Wallet from "@/js/wallet.js";
 
 const router = useRouter();
 const toast = useToast();
@@ -103,20 +102,29 @@ async function vote() {
         return;
     }
 
-    const sc = await contractKit.load("vexcore");
-    let action = sc.action("voteproducer", {
-        voter: PlaceholderName, proxy: "", producers: producers
-    });
-    let sr = await Wallet.createSigningRequest({action});
-    let vsr = sr.encode(true, false, "vsr:");
-    copyToClipboard(vsr);
-    toast.add({severity: "success", life: 3000, summary: "Vote Producers", detail: "vsr copied"});
+    const abi = await abiCache.getAbi("vexcore");
+    const action = Action.from({
+        account: "vexcore", name: "voteproducer",
+        authorization: [PlaceholderAuth],
+        data: {
+            voter: PlaceholderName, proxy: "", producers: producers
+        },
+    }, abi);
+    const request = await Wallet.createSigningRequest({action});
+    const vsr = request.encode(true, false, "vsr:");
+    if (Wallet.isConnected()) {
+        await Wallet.session.signingRequest(vsr);
+        toast.add({severity: "success", life: 3000, summary: "Vote Producers", detail: "thank you"});
+    } else {
+        copyToClipboard(vsr);
+        toast.add({severity: "success", life: 3000, summary: "Vote Producers", detail: "vsr copied"});
+    }
 }
 
 function statusBP(data) {
     if (data.owner === ChainInfo.chainInfo.head_block_producer) {
         return "Producing";
-    } else if (data.pos <= 21) {
+    } else if (data.position <= 21) {
         return "Top 21";
     } else {
         return "Paid Standby";
@@ -164,26 +172,36 @@ async function beat() {
     // baca chain info untuk mendapatkan head producer
     await ChainInfo.getChainInfo();
     let producer = ChainInfo.chainInfo.head_block_producer;
-    let res = await fetchProducers(producer, 1);
-
-    let n = producers.rows.findIndex(it => it.owner === producer);
-    let newData = res.rows[0];
-    delete newData.pos;
-    Object.assign(producers.rows[n], newData);
+    let index = producers.rows.findIndex(it => it.owner === producer);
+    producers.rows[index].refresh();
 }
 
 async function loadProducers() {
     producers.pos = 1;
-    let res = await fetchProducers(undefined);
+    let res = await fetchProducers(undefined, 25);
     producers.rows = res.rows;
     producers.more = res.more;
     producers.pos = res.rows.length + 1;
 
-    producers.rows.forEach(it => {
-        fetchBPJson(it).then(json => {
-            it.logo = json.org.branding.logo_256;
-        });
+    res.rows.forEach(it => {
+        it.fetchBPJson();
     });
+    setTimeout(loadMore, 5000);
+}
+
+async function loadMore() {
+    try {
+        let res = await fetchProducers(producers.more, 25);
+        producers.rows.push(...res.rows);
+        producers.more = res.more;
+        producers.pos += res.rows.length;
+
+        res.rows.forEach(it => {
+            it.fetchBPJson();
+        });
+    } catch (e) {
+        toast.add({severity: "error", life: 3000, summary: "Load More Producers", detail: e.message});
+    }
 }
 
 </script>
