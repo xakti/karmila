@@ -20,6 +20,9 @@
                             </Button>
                         </div>
                     </Fieldset>
+                    <div class="flex justify-end mt-2">
+                        <Button @click="doDownload" label="Unduh"></Button>
+                    </div>
                 </template>
             </Panel>
         </template>
@@ -30,6 +33,7 @@
 
 import {useRouter} from "vue-router";
 import {onActivated, onMounted, ref, watch} from "vue";
+import {download} from "@/js/utils.js";
 
 const router = useRouter();
 const props = defineProps({abi: Object, contract: String});
@@ -52,6 +56,12 @@ function viewTable(name) {
 
 function executor(name) {
     router.push(`/executor?contract=${props.contract}&action=${name}`);
+}
+
+function doDownload() {
+    const fileName = `${props.contract}_ABI.json`;
+    const data = JSON.stringify(props.abi, null, 4);
+    download(fileName, data);
 }
 
 </script>
