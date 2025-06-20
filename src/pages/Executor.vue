@@ -6,7 +6,8 @@
             <template #content>
                 <div class="flex flex-col gap-1">
                     <IftaLabel>
-                        <AutoComplete fluid input-id="contract" :delay="700" v-model="state.contract" :suggestions="suggestions.contract"
+                        <AutoComplete fluid input-id="contract" :delay="700" v-model="state.contract"
+                                      :suggestions="suggestions.contract"
                                       @complete="completeContract" @itemSelect="onSelectCode"></AutoComplete>
                         <label for="contract">Contract</label>
                     </IftaLabel>
@@ -35,10 +36,12 @@
 import {onActivated, reactive, ref} from "vue";
 import {useRoute} from "vue-router";
 import {useToast} from "primevue";
-import {contractKit} from "../js/nodes.js";
-import {suggestions, completeContract} from "../js/auto.js";
-import Wallet from "../js/wallet.js";
-import {copyToClipboard} from "@/js/utils.js";
+import {PlaceholderAuth} from "@wharfkit/signing-request";
+import {abiCache} from "@/js/nodes.js";
+import {completeContract, suggestions} from "@/js/auto.js";
+import Wallet from "@/js/wallet.js";
+import {copyToClipboard, getErrorMessage} from "@/js/utils.js";
+import {ABI, Action} from "@wharfkit/antelope";
 
 const route = useRoute();
 const toast = useToast();
@@ -47,9 +50,9 @@ const state = reactive({contract: "", action: "", fields: [], loading: false});
 const data = reactive({});
 /**
  *
- * @type {Contract}
+ * @type {ABI}
  */
-let contract = null;
+let abi = null;
 /**
  *
  * @type {ABI.Action[]}
@@ -66,8 +69,8 @@ async function parseQuery() {
         state.contract = query.contract;
         state.action = query.action;
 
-        await loadContract();
-        let n = contract.abi.actions.findIndex(it => it.name.equals(query.action));
+        await loadABI();
+        let n = abi.actions.findIndex(it => it.name.equals(query.action));
         if (n === -1) {
             toast.add({
                 life: 3000,
@@ -78,16 +81,21 @@ async function parseQuery() {
             return;
         }
 
-        let action = contract.abi.actions[n];
+        let action = abi.actions[n];
         actionSelect.value = action;
-        state.fields = contract.abi.getStruct(action.type).fields;
+        state.fields = abi.getStruct(action.type).fields;
     }
 }
+
 function onSelectCode(event) {
     state.contract = event.value;
-    loadContract();
+    loadABI();
 }
 
+async function loadABI() {
+    abi = await abiCache.getAbi(state.contract);
+    actions.value = abi.actions;
+}
 
 /**
  *
@@ -96,41 +104,33 @@ function onSelectCode(event) {
 function onAction(action) {
     actionSelect.value = action;
     state.action = action.name;
-    state.fields = contract.abi.getStruct(action.type).fields;
-}
-
-async function loadContract() {
-    contract = await contractKit.load(state.contract);
-    actions.value = contract.abi.actions;
-}
-
-function parseType() {
-    state.fields.forEach(it => {
-        if (it.type.includes("int")) {
-            data[it.name] = parseInt(data[it.name]);
-        } else if (it.type.endsWith("[]")) {
-            data[it.name] = data[it.name].split(",");
-        }
-    });
+    state.fields = abi.getStruct(action.type).fields;
 }
 
 
 async function run() {
-
-    parseType();
     state.loading = true;
     try {
-        let action = contract.action(state.action, data, {authorization: [Wallet.getAuthorization()]});
-        let sr = await Wallet.createSigningRequest({action});
-        let vsr = sr.encode(true, false, "vsr:");
-        copyToClipboard(vsr);
-
+        const abi = await abiCache.getAbi(state.contract);
+        const action = Action.from({
+            account: state.contract, name: state.action,
+            authorization: [PlaceholderAuth], data
+        }, abi);
+        let req = await Wallet.createSigningRequest({action});
+        let vsr = req.encode(true, false, "vsr:");
+        let msg;
+        if (Wallet.isConnected()) {
+            await Wallet.session.signingRequest(vsr);
+            msg = "transaction broadcasted successfully";
+        } else {
+            copyToClipboard(vsr);
+            msg = "vsr copied";
+        }
         state.loading = false;
-        toast.add({life: 3000, severity: "success", summary: "Run Action", detail: "vsr copied"});
+        toast.add({life: 3000, severity: "success", summary: "Run Action", detail: msg});
     } catch (e) {
-        console.log(e.message);
         state.loading = false;
-        toast.add({life: 4000, severity: "error", summary: "Action Failed", detail: e.message});
+        toast.add({life: 4000, severity: "error", summary: "Run Failed", detail: getErrorMessage(e)});
     }
 }
 
