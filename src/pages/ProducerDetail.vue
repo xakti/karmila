@@ -56,7 +56,7 @@
                         <span class="font-bold">Vote Pay:</span>
                         <span>{{ producer.votePay }}</span>
                     </div>
-                    <div class="flex justify-between">
+                    <div class="flex justify-between mb-2">
                         <span class="font-bold">Last Claim:</span>
                         <span>{{ producer.lastClaim.toRelative() }}</span>
                     </div>
@@ -70,7 +70,7 @@
                 </template>
                 <template #footer>
                     <div class="flex justify-end">
-                        <Button label="Vote" @click="voteVSR"></Button>
+                        <Button :loading="loadingVoting" label="Vote" @click="voteVSR"></Button>
                     </div>
                 </template>
             </Card>
@@ -129,12 +129,12 @@
 import {useRoute, useRouter} from "vue-router";
 import {onActivated, reactive, ref} from "vue";
 import {useToast} from "primevue";
-import {PlaceholderName} from "@wharfkit/signing-request";
+import {PlaceholderAuth, PlaceholderName} from "@wharfkit/signing-request";
 import {abiCache} from "../js/nodes.js";
 import ChainInfo from "@/js/chain-info.js";
 import Wallet from "@/js/wallet.js";
 import {fetchProducers, fetchVoters} from "@/js/producer.js";
-import {capitalizeFirstLetter, copyToClipboard, getFlagEmoji} from "@/js/utils.js";
+import {capitalizeFirstLetter, copyToClipboard, getErrorMessage, getFlagEmoji} from "@/js/utils.js";
 import {Action} from "@wharfkit/antelope";
 
 const route = useRoute();
@@ -145,6 +145,7 @@ const producerReady = ref(false);
 const voters = ref([]);
 const votersQuery = reactive({skip: 40, loading: false});
 const loading = ref(false);
+const loadingVoting = ref(false);
 const scroll = ref();
 
 onActivated(async () => {
@@ -194,7 +195,7 @@ async function moreVoters() {
 async function createVoteVSR() {
     const abi = await abiCache.getAbi("vexcore");
     const action = Action.from({
-        account: "vexcore", name: "voteproducer", authorization: [],
+        account: "vexcore", name: "voteproducer", authorization: [PlaceholderAuth],
         data: {
             voter: PlaceholderName, proxy: "", producers: [producer.owner]
         }
@@ -204,6 +205,7 @@ async function createVoteVSR() {
 }
 
 async function voteVSR() {
+    loadingVoting.value = true;
     try {
         let vsr = await createVoteVSR();
         let msg;
@@ -214,9 +216,11 @@ async function voteVSR() {
             copyToClipboard(vsr);
             msg = "vsr copied";
         }
+        loadingVoting.value = false;
         toast.add({severity: "success", life: 3000, summary: "Vote Producer", detail: msg});
     } catch (e) {
-        toast.add({severity: "error", life: 3000, summary: "Vote Failed", detail: e.message});
+        loadingVoting.value = false;
+        toast.add({severity: "error", life: 3000, summary: "Vote Failed", detail: getErrorMessage(e)});
     }
 }
 

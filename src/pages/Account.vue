@@ -64,64 +64,66 @@
             <Card class="drop-shadow mb-2 md:mx-auto md:w-1/2">
                 <template #title><span class="font-bold">Resources</span></template>
                 <template #content>
-                    <Fieldset legend="RAM">
-                        <div class="text-center">
-                            <ProgressBar :value="userRes.ram"></ProgressBar>
-                            <span>{{ userRes.ramStr }}</span>
-                        </div>
-                    </Fieldset>
-                    <Fieldset legend="CPU">
-                        <div class="flex flex-col text-center">
-                            <ProgressBar :value="userRes.cpu"></ProgressBar>
-                            <span>{{ userRes.cpuStr }}</span>
+                    <div class="flex flex-col gap-2">
+                        <Fieldset legend="RAM">
+                            <div class="text-center">
+                                <ProgressBar :value="userRes.ram"></ProgressBar>
+                                <span>{{ userRes.ramStr }}</span>
+                            </div>
+                        </Fieldset>
+                        <Fieldset legend="CPU">
+                            <div class="flex flex-col text-center">
+                                <ProgressBar :value="userRes.cpu"></ProgressBar>
+                                <span>{{ userRes.cpuStr }}</span>
+                                <div class="flex justify-between">
+                                    <span>Self-staked</span>
+                                    <span>{{ myCpuBalance() }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Staked by others</span>
+                                    <span>{{ cpuByOthers() }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Total</span>
+                                    <span>{{ totalCpu() }}</span>
+                                </div>
+                            </div>
+                        </Fieldset>
+                        <Fieldset legend="NET">
+                            <div class="flex flex-col text-center">
+                                <ProgressBar :value="userRes.net"></ProgressBar>
+                                <span>{{ userRes.netStr }}</span>
+                                <div class="flex justify-between">
+                                    <span>Self-staked</span>
+                                    <span>{{ myNetBalance() }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Staked by others</span>
+                                    <span>{{ netByOthers() }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Total</span>
+                                    <span>{{ totalNet() }}</span>
+                                </div>
+                            </div>
+                        </Fieldset>
+                        <Fieldset v-if="state.account.refund_request" class="mt-2" legend="Refund Request">
                             <div class="flex justify-between">
-                                <span>Self-staked</span>
-                                <span>{{ myCpuBalance() }}</span>
+                                <span>Request Time</span>
+                                <span>{{
+                                        DateTime.fromISO(state.account.refund_request.request_time + 'Z').toLocaleString(DateTime.DATETIME_MED)
+                                    }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span>Staked by others</span>
-                                <span>{{ cpuByOthers() }}</span>
+                                <span>NET</span>
+                                <span>{{ state.account.refund_request.net_amount }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span>Total</span>
-                                <span>{{ totalCpu() }}</span>
+                                <span>CPU</span>
+                                <span>{{ state.account.refund_request.cpu_amount }}</span>
                             </div>
-                        </div>
-                    </Fieldset>
-                    <Fieldset legend="NET">
-                        <div class="flex flex-col text-center">
-                            <ProgressBar :value="userRes.net"></ProgressBar>
-                            <span>{{ userRes.netStr }}</span>
-                            <div class="flex justify-between">
-                                <span>Self-staked</span>
-                                <span>{{ myNetBalance() }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Staked by others</span>
-                                <span>{{ netByOthers() }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>Total</span>
-                                <span>{{ totalNet() }}</span>
-                            </div>
-                        </div>
-                    </Fieldset>
-                    <Fieldset v-if="state.account.refund_request" class="mt-2" legend="Refund Request">
-                        <div class="flex justify-between">
-                            <span>Request Time</span>
-                            <span>{{
-                                    DateTime.fromISO(state.account.refund_request.request_time + 'Z').toLocaleString(DateTime.DATETIME_MED)
-                                }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>NET</span>
-                            <span>{{ state.account.refund_request.net_amount }}</span>
-                        </div>
-                        <div class="flex justify-between">
-                            <span>CPU</span>
-                            <span>{{ state.account.refund_request.cpu_amount }}</span>
-                        </div>
-                    </Fieldset>
+                        </Fieldset>
+                    </div>
                 </template>
             </Card>
 
