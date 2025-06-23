@@ -50,7 +50,8 @@
                     </div>
                 </template>
                 <template #footer>
-                    <div class="flex justify-end">
+                    <div class="flex justify-end gap-2">
+                        <Button label="Form" @click="openForm"></Button>
                         <Button label="Holders" @click="openHolder"></Button>
                     </div>
                 </template>
@@ -59,18 +60,20 @@
             <Card class="drop-shadow md:w-1/2 md:mx-auto mt-2">
                 <template #title>Contract ABI</template>
                 <template #content>
-                    <Fieldset v-if="tables.length > 0" legend="Tables" class="w-fit mt-4">
-                        <div class="flex flex-wrap gap-2">
-                            <Button v-for="(it,n) in tables" :key="n"
-                                    size="small" link @click="viewTable(it.name)" :label="it.name"></Button>
-                        </div>
-                    </Fieldset>
-                    <Fieldset v-if="actions.length > 0" legend="Actions" class="w-fit">
-                        <div class="flex flex-wrap gap-2">
-                            <Button v-for="(it,n) in actions" :key="n"
-                                    size="small" link @click="executor(it.name)" :label="it.name"></Button>
-                        </div>
-                    </Fieldset>
+                    <div class="flex flex-col gap-2">
+                        <Fieldset v-if="tables.length > 0" legend="Tables" class="w-fit">
+                            <div class="flex flex-wrap gap-2">
+                                <Button v-for="(it,n) in tables" :key="n"
+                                        size="small" link @click="viewTable(it.name)" :label="it.name.toString()"></Button>
+                            </div>
+                        </Fieldset>
+                        <Fieldset v-if="actions.length > 0" legend="Actions" class="w-fit">
+                            <div class="flex flex-wrap gap-2">
+                                <Button v-for="(it,n) in actions" :key="n"
+                                        size="small" link @click="executor(it.name)" :label="it.name.toString()"></Button>
+                            </div>
+                        </Fieldset>
+                    </div>
                 </template>
             </Card>
 
@@ -97,7 +100,7 @@
                 </template>
                 <template #footer>
                     <div class="flex justify-end">
-                        <Button icon="pi pi-send" @click="doTransfer"></Button>
+                        <Button icon="pi pi-send" :loading="loading" @click="doTransfer"></Button>
                     </div>
                 </template>
             </Card>
@@ -117,13 +120,13 @@
 import {useRoute, useRouter} from "vue-router";
 import {onActivated, reactive, ref} from "vue";
 import {useToast} from "primevue";
-import {client, contractKit} from "../js/nodes.js";
-import {fetchDetail, findToken, mapTokens} from "../js/token.js";
-import Wallet from "../js/wallet.js";
-import {copyToClipboard} from "../js/utils.js";
-import {suggestions, completeAccount} from "../js/auto.js";
-import {PlaceholderName} from "@wharfkit/signing-request";
-import {Asset} from "@wharfkit/antelope";
+import {abiCache, client} from "@/js/nodes.js";
+import {fetchDetail, findToken, mapTokens} from "@/js/token.js";
+import Wallet from "@/js/wallet.js";
+import {copyToClipboard, getErrorMessage} from "@/js/utils.js";
+import {completeAccount, suggestions} from "@/js/auto.js";
+import {PlaceholderAuth, PlaceholderName} from "@wharfkit/signing-request";
+import {Action, Asset} from "@wharfkit/antelope";
 
 const route = useRoute();
 const router = useRouter();
@@ -136,6 +139,7 @@ const tokenStat = reactive({id: 0, icon: ""});
 const tokenDetail = reactive({about: "", website: "", socials: []});
 const transfer = reactive({to: "", quantity: undefined, memo: ""});
 const ready = ref(false);
+const loading = ref(false);
 
 onActivated(() => {
     let path = route.params.ticker.split("-");
@@ -158,6 +162,10 @@ onActivated(() => {
 function openSite(url) {
     if (!url.startsWith("https:")) url = "https://" + url;
     window.open(url, "_blank");
+}
+
+function openForm() {
+    router.push(`/token/form/${ticker.contract}-${ticker.symbol}`);
 }
 
 function openHolder() {
@@ -186,9 +194,10 @@ async function fetchCurrencyStats() {
 }
 
 async function fetchAbi() {
-    let res = await client.v1.chain.get_abi(ticker.contract);
-    actions.value = res.abi.actions;
-    tables.value = res.abi.tables;
+    const abi = await abiCache.getAbi(ticker.contract);
+    actions.value = abi.actions;
+    tables.value = abi.tables;
+    abi.actions[0].name;
 }
 
 async function getTokenStat() {
@@ -243,7 +252,8 @@ async function doTransfer() {
         toast.add({life: 3000, severity: "warn", summary: "Transfer Invalid", detail: "enter receiver address"});
         return;
     }
-    if (parseFloat(transfer.quantity) === 0) {
+    const quantity = parseFloat(transfer.quantity);
+    if (quantity === 0 || isNaN(quantity)) {
         toast.add({life: 3000, severity: "warn", summary: "Transfer Invalid", detail: "enter quantity"});
         return;
     }
@@ -254,18 +264,27 @@ async function doTransfer() {
         quantity: Asset.fromString(token.supply.toString()),
         memo: transfer.memo
     };
-    data.quantity.value = parseFloat(transfer.quantity);
-
-
+    data.quantity.units = data.quantity.symbol.convertFloat(quantity);
+    loading.value = true;
     try {
-        let sc = await contractKit.load(ticker.contract);
-        let action = sc.action("transfer", data);
-        let sr = await Wallet.createSigningRequest({action});
-        let vsr = sr.encode(true, false, "vsr:");
-        copyToClipboard(vsr);
-        toast.add({life: 3000, severity: "success", summary: "Transfer Token", detail: "vsr copied"});
+        const abi = await abiCache.getAbi(ticker.contract);
+        const action = Action.from({
+            account: ticker.contract, name: "transfer",
+            authorization: [PlaceholderAuth], data
+        }, abi);
+        const request = await Wallet.createSigningRequest({action});
+        const vsr = request.encode(true, false, "vsr:");
+        if (Wallet.isConnected()) {
+            await Wallet.session.signingRequest(vsr);
+            toast.add({life: 3000, severity: "success", summary: "Transfer Token", detail: "token sent"});
+        } else {
+            copyToClipboard(vsr);
+            toast.add({life: 3000, severity: "success", summary: "Transfer Token", detail: "vsr copied"});
+        }
+        loading.value = false;
     } catch (e) {
-        toast.add({life: 3000, severity: "error", summary: "Transfer Error", detail: e.message});
+        loading.value = false;
+        toast.add({life: 3000, severity: "error", summary: "Transfer Error", detail: getErrorMessage(e)});
     }
 }
 
