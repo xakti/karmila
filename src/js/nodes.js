@@ -1,6 +1,5 @@
 import {reactive} from "vue";
 import {APIClient} from '@wharfkit/antelope';
-import {ContractKit} from "@wharfkit/contract";
 import {ABICache} from "@wharfkit/abicache";
 
 const VEX_RPC = "vexnode"; // untuk simpan di localstorage
@@ -28,17 +27,10 @@ let client = null;
  * @type {ABICache}
  */
 let abiCache = null;
-/**
- *
- * @type {ContractKit}
- */
-let contractKit = null;
-
 
 function initWharfkit() {
     client = new APIClient({url: endpoint});
     abiCache = new ABICache(client);
-    contractKit = new ContractKit({client}, {abiCache});
 }
 
 async function pingNode(id) {
@@ -87,7 +79,12 @@ function getSelectedNode() {
     return localStorage.getItem(VEX_RPC) ?? "bitvexa";
 }
 
+function getSelectedHyperion() {
+    return localStorage.getItem("hyperion") ?? "bitvexa";
+}
+
 export {
-    ChainID, listNodes, client, abiCache, contractKit, endpointHyperion,
-    pingNode, pingAllNodes, saveNode, loadNode, saveHyperion, getSelectedNode, initWharfkit
+    ChainID, listNodes, client, abiCache, endpointHyperion,
+    pingNode, pingAllNodes, saveNode, loadNode, saveHyperion, getSelectedNode, getSelectedHyperion,
+    initWharfkit
 };

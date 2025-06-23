@@ -1,41 +1,55 @@
 import {SigningRequest} from "@wharfkit/signing-request";
 import {PermissionLevel} from "@wharfkit/antelope";
 import zlib from "pako";
-import {abiCache, ChainID} from "./nodes.js";
+import {ref} from "vue";
+import {Herlina, WalletSession} from "herlina-kit";
+import {abiCache} from "./nodes.js";
 
-const Wallet = Object.create(null);
+const Wallet = {
+    /**
+     *
+     * @type {Herlina}
+     */
+    herlina: null,
+    /**
+     *
+     * @type {WalletSession}
+     */
+    session: null,
+    open: ref(false), // apakah sudah dapat nama akun dari wallet
+    account: ref(""), // akun sedang dipakai 'nama@active'
+    encodingOptions: {zlib, abiProvider: abiCache},
 
-/**
- *
- * @type {Name}
- */
-Wallet.account = null;
-/**
- *
- * @type {Name}
- */
-Wallet.permission = null;
-
-/**
- *
- * @return {PermissionLevel}
- */
-Wallet.getAuthorization = function () {
-    return PermissionLevel.from(`${this.account}@${this.permission}`);
-}
-
-Wallet.saveAccount = function (name, permission) {
-    this.account = name;
-    this.permission = permission;
-}
-
-/**
- *
- * @param {SigningRequestCreateArguments} args
- */
-Wallet.createSigningRequest = function (args) {
-    args.chainId = ChainID;
-    return SigningRequest.create(args, {zlib, abiProvider: abiCache});
-}
+    /**
+     *
+     * @param {string} value
+     */
+    setAccount(value) {
+        this.account.value = value;
+        this.open.value = true;
+    },
+    isConnected() {
+        return this.open.value;
+    },
+    /**
+     *
+     * @return {PermissionLevel}
+     */
+    getPermission() {
+        if (this.session) {
+            return this.session.permissionLevel;
+        }
+        throw new Error("wallet not connected");
+    },
+    /**
+     * pintasan untuk membuat SigningRequest
+     * @param {SigningRequestCreateArguments} args
+     * @return {Promise<SigningRequest>}
+     */
+    createSigningRequest(args) {
+        args.chainId = WalletSession.ChainID;
+        return SigningRequest.create(args, this.encodingOptions);
+    }
+};
 
 export default Wallet;

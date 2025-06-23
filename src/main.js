@@ -2,9 +2,9 @@ import './style.css'
 import 'primeicons/primeicons.css'
 
 import {createApp} from 'vue'
-import {createWebHistory, createRouter} from 'vue-router'
+import {createRouter, createWebHistory} from 'vue-router'
 import PrimeVue from "primevue/config"
-import Aura from "@primeuix/themes/aura"
+import Lara from "@primeuix/themes/lara"
 import ToastService from "primevue/toastservice";
 import Tooltip from 'primevue/tooltip';
 import routes from "./js/routes.js"
@@ -19,7 +19,7 @@ const app = createApp(App);
 app.use(
     PrimeVue, {
         theme: {
-            preset: Aura,
+            preset: Lara,
             options: {
                 darkModeSelector: '.ui-dark'
             }

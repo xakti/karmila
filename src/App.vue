@@ -33,12 +33,13 @@
             </section>
         </template>
     </Toast>
-
+    <WalletSelector/>
 </template>
 <script setup>
 
 import {onMounted} from "vue";
 import {loadNode, initWharfkit} from "./js/nodes.js";
+import WalletSelector from "@/components/WalletSelector.vue";
 
 onMounted(() => {
     loadNode();

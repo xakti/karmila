@@ -1,9 +1,9 @@
 <template>
-    <div id="setting">
+    <div id="setting" class="p-2">
 
-        <Card class="drop-shadow m-2 md:w-1/2 md:mx-auto">
+        <Card class="drop-shadow md:w-1/2 md:mx-auto">
             <template #title>
-                Setting
+                <span class="font-bold text-xl">Setting</span>
                 <div class="float-right">
                     <transition mode="out-in" name="fade">
                         <i v-if="dark" class="pi pi-moon cursor-pointer" @click="onDark"></i>
@@ -12,19 +12,18 @@
                 </div>
             </template>
             <template #content>
-                <Fieldset legend="Nodes">
-                    <div class="flex flex-col">
-                        <div v-for="(it,key,n) in listNodes" :key="n" class="flex justify-between">
-                            <div class="inline-flex gap-2 items-center">
-                                <RadioButton @update:model-value="onNode" v-model="node" name="node" :value="key"/>
-                                {{ it.name }}
-                                <Tag v-if="it.hyperion" value="hyperion" class="cursor-pointer select-none"
-                                  :icon="isCurrentHyperion(key)" @click="setHyperion(key)"></Tag>
-                            </div>
-                            <span>{{ it.speed }}</span>
+                <span class="font-bold text-lg">Nodes</span>
+                <div class="flex flex-col">
+                    <div v-for="(it,key,n) in listNodes" :key="n" class="flex justify-between">
+                        <div class="inline-flex gap-2 items-center">
+                            <RadioButton @update:model-value="onNode" v-model="node" name="node" :value="key"/>
+                            {{ it.name }}
+                            <Tag v-if="it.hyperion" value="hyperion" class="cursor-pointer select-none"
+                                 :icon="isCurrentHyperion(key)" @click="setHyperion(key)"></Tag>
                         </div>
+                        <span>{{ it.speed }}</span>
                     </div>
-                </Fieldset>
+                </div>
             </template>
         </Card>
     </div>

@@ -117,3 +117,14 @@ export function download(filename, data) {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
 }
+
+export function getErrorMessage(error) {
+    let msg = error.message;
+    if (error.response) {
+        let json = error.response.json;
+        msg = json.error.details[0].message;
+    } else if (error.error) {
+        msg = error.error.details[0].message;
+    }
+    return msg;
+}

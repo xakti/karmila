@@ -3,6 +3,7 @@
         <Toolbar class="shadow-lg rounded-b-2xl! rounded-t-none! fixed top-0 z-10 w-full">
             <template #start>
                 <Button icon="pi pi-bars" @click="state.drawer = true"></Button>
+                <img alt="" src="/icon-128.png" width="40" class="ml-2">
                 <span class="text-2xl font-bold mx-2">Karmila</span>
             </template>
             <template #end>
@@ -12,7 +13,20 @@
                 </div>
             </template>
         </Toolbar>
-        <Drawer header="Karmila" :visible="state.drawer" @update:visible="state.drawer = false">
+        <Drawer :visible="state.drawer" @update:visible="state.drawer = false">
+            <template #header>
+                <div class="inline-flex items-center gap-2">
+                    <img alt="" src="/icon-128.png" width="40">
+                    <span class="font-bold text-2xl">Karmila</span>
+                </div>
+            </template>
+            <div class="flex w-full">
+                <div v-if="Wallet.isConnected()" class="inline-flex gap-4 mb-4 items-center border border-surface rounded-xl shadow-md p-2 mx-auto">
+                    <span class="font-bold text-lg">{{ Wallet.account }}</span>
+                    <Button size="small" rounded raised text icon="pi pi-power-off" @click="closeWallet"></Button>
+                </div>
+                <Button v-else class="mx-auto mb-2" label="Login" @click="showWalletSelector"></Button>
+            </div>
             <PanelMenu multiple :model="menuItems"></PanelMenu>
         </Drawer>
 
@@ -39,10 +53,11 @@
 <script setup>
 import {onActivated, reactive, ref} from "vue";
 import {onBeforeRouteLeave, useRouter} from "vue-router";
-import {startInterval} from "./js/utils.js";
-import {completeAccount, suggestions} from "./js/auto.js";
+import {startInterval} from "@/js/utils.js";
+import {completeAccount, suggestions} from "@/js/auto.js";
 import ChainInfo from "@/components/ChainInfo.vue";
 import LatestAction from "@/components/LatestAction.vue";
+import Wallet from "@/js/wallet.js";
 
 const router = useRouter();
 const state = reactive({query: "", drawer: false});
@@ -71,6 +86,15 @@ onActivated(() => {
 onBeforeRouteLeave(() => {
     stopRandomLabel();
 });
+
+function showWalletSelector() {
+    if (state.drawer) state.drawer = false;
+    Wallet.show();
+}
+
+function closeWallet() {
+    Wallet.session.close();
+}
 
 function openPage(path) {
     if (state.drawer) state.drawer = false;
