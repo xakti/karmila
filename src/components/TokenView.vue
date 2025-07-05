@@ -1,29 +1,27 @@
 <template>
-    <Card class="drop-shadow">
-        <template #title>Tokens({{ count }})</template>
-        <template #content>
-            <div v-if="tokens.length > 0">
-                <ScrollPanel class="h-fit" style="max-height: 320px">
-                    <div class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-2 p-1">
-                        <div v-for="(it,n) in tokens" :key="n"
-                             class="border border-surface rounded-xl shadow p-2 hover:bg-primary-200 cursor-pointer"
-                             @click="openToken(it)">
-                            <div class="flex gap-2 items-center">
-                                <img alt="" :src="it.icon || '/token-default.png'" width="36">
-                                <div class="flex flex-col">
-                                    <span>{{ groupNumber(it.amount) }}</span>
-                                    <span><span class="font-semibold">{{ it.symbol }}</span> {{ it.contract }}</span>
-                                </div>
+    <div class="border border-surface rounded-md shadow-md p-2">
+        <span class="font-bold text-xl">Tokens({{ count }})</span>
+        <div v-if="tokens.length > 0">
+            <ScrollPanel class="h-fit max-h-[320px]">
+                <div class="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-1 gap-2 p-1">
+                    <div v-for="(it,n) in tokens" :key="n"
+                         class="border border-surface rounded-xl shadow p-2 hover:bg-primary-200 cursor-pointer"
+                         @click="openToken(it)">
+                        <div class="flex gap-2 items-center">
+                            <img alt="" :src="it.icon || '/token-default.png'" width="36">
+                            <div class="flex flex-col">
+                                <span>{{ groupNumber(it.amount) }}</span>
+                                <span><span class="font-semibold">{{ it.symbol }}</span> {{ it.contract }}</span>
                             </div>
                         </div>
                     </div>
-                </ScrollPanel>
-            </div>
-            <div v-else class="text-center">
-                <span>Balance is empty</span>
-            </div>
-        </template>
-    </Card>
+                </div>
+            </ScrollPanel>
+        </div>
+        <div v-else class="text-center">
+            <span>Balance is empty</span>
+        </div>
+    </div>
 </template>
 
 <script setup>

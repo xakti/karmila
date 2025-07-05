@@ -3,9 +3,10 @@
 
         <div class="flex flex-col p-2">
             <span class="font-bold text-lg">Actions({{ ActionsCount() }})</span>
-            <span>Last Irreversible Block: <Button link as="router-link"
-                                                   :to="`/block/${ChainInfo.chainInfo.last_irreversible_block_num}`"
-                                                   :label="ChainInfo.chainInfo.last_irreversible_block_num.toString()"></Button>
+            <span>Last Irreversible Block:
+                    <router-link class="text-primary-400" :to="`/block/${ChainInfo.chainInfo.last_irreversible_block_num}`">
+                        {{ ChainInfo.chainInfo.last_irreversible_block_num }}
+                    </router-link>
             </span>
             <div class="flex gap-2">
                 <Button icon="pi pi-filter" @click="showFilterDialog = true"></Button>
@@ -24,10 +25,9 @@
                             <i class="pi pi-hourglass animate-spin mr-1"></i>{{ data.pending }}s
                         </span>
                         <i v-else class="pi pi-lock"></i>
-                        <Button link as="router-link" :to="`/transaction/${data.transaction_id}`">{{
-                                data.transaction_id.slice(0, 8)
-                            }}
-                        </Button>
+                        <router-link class="text-primary-400" :to="`/transaction/${data.transaction_id}`">
+                            {{ data.transaction_id.slice(0, 8) }}
+                        </router-link>
                     </div>
                 </template>
             </Column>
@@ -40,7 +40,9 @@
             <Column header="Block & Date">
                 <template #body="{data}">
                     <div class="text-center">
-                        <Button link as="router-link" :to="`/block/${data.block}`">{{ data.block }}</Button>
+                        <router-link class="text-primary-400" :to="`/block/${data.block}`">
+                            {{ data.block }}
+                        </router-link>
                         <br>
                         <span>{{
                                 DateTime.fromISO(data.timestamp + 'Z').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)

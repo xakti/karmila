@@ -42,7 +42,7 @@
                                     </FloatLabel>
                                     <InputGroupAddon>
                                         <Button type="submit" text icon="pi pi-search" :loading="loading"
-                                                @click="runQuery"></Button>
+                                                @click.prevent="runQuery"></Button>
                                     </InputGroupAddon>
                                 </InputGroup>
                             </form>

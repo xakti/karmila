@@ -1,11 +1,11 @@
 <template>
-    <Card class="drop-shadow">
-        <template #content>
-            <Panel toggleable collapsed>
-                <template #header>
-                    <span class="font-bold text-lg">Contract ABI</span>
-                </template>
-                <template #default>
+    <div class="border border-surface rounded-md shadow-md p-2">
+        <Panel toggleable collapsed>
+            <template #header>
+                <span class="font-bold text-lg">Contract ABI</span>
+            </template>
+            <template #default>
+                <div class="flex flex-col gap-2">
                     <Fieldset v-if="tables.length > 0" legend="Tables" class="w-fit">
                         <div class="flex flex-wrap">
                             <Button v-for="(it,n) in tables" :key="n"
@@ -20,13 +20,13 @@
                             </Button>
                         </div>
                     </Fieldset>
-                    <div class="flex justify-end mt-2">
-                        <Button @click="doDownload" label="Unduh"></Button>
-                    </div>
-                </template>
-            </Panel>
-        </template>
-    </Card>
+                </div>
+                <div class="flex justify-end mt-2">
+                    <Button @click="doDownload" label="Unduh"></Button>
+                </div>
+            </template>
+        </Panel>
+    </div>
 </template>
 
 <script setup>

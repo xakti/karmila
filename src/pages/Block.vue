@@ -14,7 +14,9 @@
                     </div>
                     <p class="truncate">Block ID: {{ block.id }}</p>
                     <p>Producer:
-                        <Button link as="router-link" :to="`/producer/${block.producer}`">{{ block.producer }}</Button>
+                        <router-link class="text-primary-400" :to="`/producer/${block.producer}`">
+                            {{ block.producer }}
+                        </router-link>
                     </p>
                     <span>Time:
                     {{

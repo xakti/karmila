@@ -1,44 +1,40 @@
 <template>
-    <Card class="drop-shadow">
-        <template #title>
-            <span class="font-bold">Permissions & Keys</span>
-        </template>
-        <template #content>
-            <Tree :value="permissions" scroll-height="flex">
-                <template #default="{node}">
-                    <Fieldset :legend="`${node.label} (${node.data.required_auth.threshold})`">
-                        <template v-if="node.data.required_auth.keys.length > 0">
-                            <div v-for="(it,n) in node.data.required_auth.keys" :key="n"
-                                 class="border rounded-md border-surface p-1 flex flex-col whitespace-nowrap">
-                                <p>
-                                    <span>+{{ it.weight }}</span>
-                                    <i class="pi pi-key mx-3 cursor-pointer" @click="formatKey(it)"></i>
-                                    <span>{{ it.key }}</span>
-                                </p>
-                            </div>
-                        </template>
-                        <template v-if="node.data.required_auth.accounts.length > 0">
-                            <div v-for="(it,n) in node.data.required_auth.accounts" :key="n"
-                                 class="border rounded-md border-surface p-1 flex flex-col my-2 whitespace-nowrap">
-                                <span>+{{ it.weight }} {{ it.permission.actor }}@{{ it.permission.permission }}</span>
-                            </div>
-                        </template>
-                        <template v-if="node.data.required_auth.waits.length > 0">
-                            <div v-for="(it,n) in node.data.required_auth.waits" :key="n"
-                                 class="border rounded-md border-surface p-1 flex flex-col">
-                                <span>+{{ it.weight }} Wait {{ it.wait_sec }} Seconds</span>
-                            </div>
-                        </template>
-                    </Fieldset>
-                </template>
-            </Tree>
-            <Message size="small" severity="info">
-                Note:
-                PUB_K1 keys are the new format for public keys and are interchangeable with the old format.
-                Click on the <i class="pi pi-key"/> icon to see the old format.
-            </Message>
-        </template>
-    </Card>
+    <div class="border border-surface rounded-md shadow-md p-2">
+        <span class="font-bold text-xl">Permissions & Keys</span>
+        <Tree :value="permissions" scroll-height="flex">
+            <template #default="{node}">
+                <Fieldset :legend="`${node.label} (${node.data.required_auth.threshold})`">
+                    <template v-if="node.data.required_auth.keys.length > 0">
+                        <div v-for="(it,n) in node.data.required_auth.keys" :key="n"
+                             class="border rounded-md border-surface p-1 flex flex-col whitespace-nowrap">
+                            <p>
+                                <span>+{{ it.weight }}</span>
+                                <i class="pi pi-key mx-3 cursor-pointer" @click="formatKey(it)"></i>
+                                <span>{{ it.key }}</span>
+                            </p>
+                        </div>
+                    </template>
+                    <template v-if="node.data.required_auth.accounts.length > 0">
+                        <div v-for="(it,n) in node.data.required_auth.accounts" :key="n"
+                             class="border rounded-md border-surface p-1 flex flex-col my-2 whitespace-nowrap">
+                            <span>+{{ it.weight }} {{ it.permission.actor }}@{{ it.permission.permission }}</span>
+                        </div>
+                    </template>
+                    <template v-if="node.data.required_auth.waits.length > 0">
+                        <div v-for="(it,n) in node.data.required_auth.waits" :key="n"
+                             class="border rounded-md border-surface p-1 flex flex-col">
+                            <span>+{{ it.weight }} Wait {{ it.wait_sec }} Seconds</span>
+                        </div>
+                    </template>
+                </Fieldset>
+            </template>
+        </Tree>
+        <Message size="small" severity="info">
+            Note:
+            PUB_K1 keys are the new format for public keys and are interchangeable with the old format.
+            Click on the <i class="pi pi-key"/> icon to see the old format.
+        </Message>
+    </div>
 </template>
 
 <script setup>

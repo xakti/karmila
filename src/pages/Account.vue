@@ -3,129 +3,121 @@
 
         <div v-if="state.progress === 3" class="flex flex-col">
 
-            <Card class="drop-shadow md:w-1/2 md:mx-auto mb-2">
-                <template #title>
-                    <i v-if="state.account.privileged" class="pi pi-shield mr-1"></i>
-                    <i v-else class="pi pi-user mr-1"></i>
+            <div class="border border-surface rounded-md shadow-md p-2 mb-2 md:w-1/2 md:mx-auto">
+                <div class="inline-flex items-center">
+                    <i v-if="state.account.privileged" class="pi pi-shield mr-2"></i>
+                    <i v-else class="pi pi-user mr-2"></i>
                     <span class="text-2xl font-bold">{{ route.params.name }}</span>
                     <span v-if="state.creator.length > 0" class="text-xs ml-1">by {{ state.creator }}</span>
-                </template>
-                <template #content>
-                    <div class="flex justify-between items-center">
-                        <span class="font-bold">Total Balance</span>
-                        <div class="flex flex-col text-right">
-                            <span>{{ formatAsset(totalBalance()) }}</span>
-                            <span>{{ formatAsset(ChainInfo.toIDR(totalBalance())) }}</span>
-                        </div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold">Total Balance</span>
+                    <div class="flex flex-col text-right">
+                        <span>{{ formatAsset(totalBalance()) }}</span>
+                        <span>{{ formatAsset(ChainInfo.toIDR(totalBalance())) }}</span>
                     </div>
-                    <div class="flex justify-between">
-                        <span class="font-bold">Liquid</span>
-                        <span>{{ state.account.core_liquid_balance || "0.0000 VEX" }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="font-bold">Staked</span>
-                        <span>{{ getStaked() }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="font-bold">Refunding</span>
-                        <span>{{ refundBalance() }}</span>
-                    </div>
-                    <div v-if="state.account.rex_info" class="flex justify-between">
-                        <span class="font-bold">Total REX</span>
-                        <span>{{ state.account.rex_info.rex_balance }}</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="font-bold">Created on</span>
-                        <span>{{
-                                DateTime.fromISO(state.account.created + 'Z').toLocaleString(DateTime.DATETIME_MED)
-                            }}</span>
-                    </div>
-                </template>
-            </Card>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Liquid</span>
+                    <span>{{ state.account.core_liquid_balance || "0.0000 VEX" }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Staked</span>
+                    <span>{{ getStaked() }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Refunding</span>
+                    <span>{{ refundBalance() }}</span>
+                </div>
+                <div v-if="state.account.rex_info" class="flex justify-between">
+                    <span class="font-bold">Total REX</span>
+                    <span>{{ state.account.rex_info.rex_balance }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Created on</span>
+                    <span>{{
+                            DateTime.fromISO(state.account.created + 'Z').toLocaleString(DateTime.DATETIME_MED)
+                        }}</span>
+                </div>
+            </div>
 
-            <Card v-if="isVoteProducer()" class="drop-shadow md:mx-auto md:w-1/2 mb-2">
-                <template #title>
-                    <span class="font-bold">Votes</span>
-                </template>
-                <template #content>
-                    <div>
-                        <div class="flex justify-between">
-                            <span class="font-bold">Producers</span>
-                            <p class="text-center">{{ state.account.voter_info.producers.join(", ") }}</p>
-                        </div>
-                        <div class="flex justify-between">
-                            <span class="font-bold">Weight</span>
-                            <span>{{ voteWeight() }}</span>
-                        </div>
+            <div v-if="isVoteProducer()" class="border border-surface rounded-md shadow-md p-2 mb-2 md:mx-auto md:w-1/2">
+                <span class="font-bold text-xl">Votes</span>
+                <div class="flex flex-col">
+                    <div class="flex justify-between">
+                        <span class="font-bold">Producers</span>
+                        <p class="text-center">{{ state.account.voter_info.producers.join(", ") }}</p>
                     </div>
-                </template>
-            </Card>
+                    <div class="flex justify-between">
+                        <span class="font-bold">Weight</span>
+                        <span>{{ voteWeight() }}</span>
+                    </div>
+                </div>
+            </div>
 
-            <Card class="drop-shadow mb-2 md:mx-auto md:w-1/2">
-                <template #title><span class="font-bold">Resources</span></template>
-                <template #content>
-                    <div class="flex flex-col gap-2">
-                        <Fieldset legend="RAM">
-                            <div class="text-center">
-                                <ProgressBar :value="userRes.ram"></ProgressBar>
-                                <span>{{ userRes.ramStr }}</span>
-                            </div>
-                        </Fieldset>
-                        <Fieldset legend="CPU">
-                            <div class="flex flex-col text-center">
-                                <ProgressBar :value="userRes.cpu"></ProgressBar>
-                                <span>{{ userRes.cpuStr }}</span>
-                                <div class="flex justify-between">
-                                    <span>Self-staked</span>
-                                    <span>{{ myCpuBalance() }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Staked by others</span>
-                                    <span>{{ cpuByOthers() }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Total</span>
-                                    <span>{{ totalCpu() }}</span>
-                                </div>
-                            </div>
-                        </Fieldset>
-                        <Fieldset legend="NET">
-                            <div class="flex flex-col text-center">
-                                <ProgressBar :value="userRes.net"></ProgressBar>
-                                <span>{{ userRes.netStr }}</span>
-                                <div class="flex justify-between">
-                                    <span>Self-staked</span>
-                                    <span>{{ myNetBalance() }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Staked by others</span>
-                                    <span>{{ netByOthers() }}</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span>Total</span>
-                                    <span>{{ totalNet() }}</span>
-                                </div>
-                            </div>
-                        </Fieldset>
-                        <Fieldset v-if="state.account.refund_request" class="mt-2" legend="Refund Request">
+            <div class="border border-surface rounded-md shadow-md p-2 mb-2 md:mx-auto md:w-1/2">
+                <span class="font-bold text-xl">Resources</span>
+                <div class="flex flex-col gap-2 mt-2">
+                    <Fieldset legend="RAM">
+                        <div class="text-center">
+                            <ProgressBar :value="userRes.ram"></ProgressBar>
+                            <span>{{ userRes.ramStr }}</span>
+                        </div>
+                    </Fieldset>
+                    <Fieldset legend="CPU">
+                        <div class="flex flex-col text-center">
+                            <ProgressBar :value="userRes.cpu"></ProgressBar>
+                            <span>{{ userRes.cpuStr }}</span>
                             <div class="flex justify-between">
-                                <span>Request Time</span>
-                                <span>{{
-                                        DateTime.fromISO(state.account.refund_request.request_time + 'Z').toLocaleString(DateTime.DATETIME_MED)
-                                    }}</span>
+                                <span>Self-staked</span>
+                                <span>{{ myCpuBalance() }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span>NET</span>
-                                <span>{{ state.account.refund_request.net_amount }}</span>
+                                <span>Staked by others</span>
+                                <span>{{ cpuByOthers() }}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span>CPU</span>
-                                <span>{{ state.account.refund_request.cpu_amount }}</span>
+                                <span>Total</span>
+                                <span>{{ totalCpu() }}</span>
                             </div>
-                        </Fieldset>
-                    </div>
-                </template>
-            </Card>
+                        </div>
+                    </Fieldset>
+                    <Fieldset legend="NET">
+                        <div class="flex flex-col text-center">
+                            <ProgressBar :value="userRes.net"></ProgressBar>
+                            <span>{{ userRes.netStr }}</span>
+                            <div class="flex justify-between">
+                                <span>Self-staked</span>
+                                <span>{{ myNetBalance() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Staked by others</span>
+                                <span>{{ netByOthers() }}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Total</span>
+                                <span>{{ totalNet() }}</span>
+                            </div>
+                        </div>
+                    </Fieldset>
+                    <Fieldset v-if="state.account.refund_request" class="mt-2" legend="Refund Request">
+                        <div class="flex justify-between">
+                            <span>Request Time</span>
+                            <span>{{
+                                    DateTime.fromISO(state.account.refund_request.request_time + 'Z').toLocaleString(DateTime.DATETIME_MED)
+                                }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>NET</span>
+                            <span>{{ state.account.refund_request.net_amount }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>CPU</span>
+                            <span>{{ state.account.refund_request.cpu_amount }}</span>
+                        </div>
+                    </Fieldset>
+                </div>
+            </div>
 
             <PermissionView class="mb-2 md:w-2/3 md:mx-auto" :permissions="state.account.permissions"></PermissionView>
             <TokenView class="mb-2 md:w-2/3 md:mx-auto" :account="route.params.name"></TokenView>

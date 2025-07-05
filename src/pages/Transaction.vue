@@ -16,9 +16,11 @@
                 </template>
                 <template #content>
                     <div class="flex flex-col">
-                    <span>Block number: <Button link as="router-link" :to="`/block/${trx.actions[0].block_num}`">{{
-                            trx.actions[0].block_num
-                        }}</Button></span>
+                        <span>Block number:
+                            <router-link class="text-primary-400" :to="`/block/${trx.actions[0].block_num}`">
+                                {{ trx.actions[0].block_num }}
+                            </router-link>
+                        </span>
                         <span>Block time: {{
                                 DateTime.fromISO(trx.actions[0].timestamp + 'Z').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
                             }}</span><br>
@@ -44,7 +46,7 @@
                     </template>
                     <Column header="Contract" :field="it => it.act.account"></Column>
                     <Column header="Action" :field="it => it.act.name"></Column>
-                    <Column header="Data" :field="it => it.act.data" style="max-width: 250px">
+                    <Column header="Data" :field="it => it.act.data" class="max-w-[250px]">
                         <template #body="{data}">
                             <ActDataView :data="data.act.data"></ActDataView>
                         </template>
