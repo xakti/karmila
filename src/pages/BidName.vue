@@ -34,15 +34,14 @@
                     </TabPanel>
                     <TabPanel value="1">
                         <div class="md:w-1/2 mx-auto mb-2">
-                            <form>
+                            <form @submit.prevent.stop="runQuery">
                                 <InputGroup>
                                     <FloatLabel variant="in">
                                         <InputText id="name" type="text" v-model="query.name"></InputText>
                                         <label for="name">Find by name</label>
                                     </FloatLabel>
                                     <InputGroupAddon>
-                                        <Button type="submit" text icon="pi pi-search" :loading="loading"
-                                                @click.prevent="runQuery"></Button>
+                                        <Button type="submit" text icon="pi pi-search" :loading="loading"></Button>
                                     </InputGroupAddon>
                                 </InputGroup>
                             </form>
@@ -159,13 +158,18 @@ function tryRaiseBid(event) {
  */
 async function runQuery() {
     loading.value = true;
-    await findByName(query.name, query.limit);
-    setTimeout(() => {
-        if (scroll != null) {
-            scroll.value.$el.firstElementChild.scrollTo({top: 0, behavior: "smooth"});
-        }
-    }, 200);
-    loading.value = false;
+    try {
+        await findByName(query.name.toLowerCase(), query.limit);
+        setTimeout(() => {
+            if (scroll != null) {
+                scroll.value.$el.firstElementChild.scrollTo({top: 0, behavior: "smooth"});
+            }
+        }, 200);
+    } catch (e) {
+        toast.add({severity: "error", life: 4000, summary: "Find Error", detail: e.message});
+    }finally {
+        loading.value = false;
+    }
 }
 
 async function fetchSoldName(bound, limit) {
