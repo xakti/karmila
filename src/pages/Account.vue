@@ -39,6 +39,12 @@
                             DateTime.fromISO(state.account.created + 'Z').toLocaleString(DateTime.DATETIME_MED)
                         }}</span>
                 </div>
+                <div class="flex justify-between">
+                    <span class="font-bold">Last Activity</span>
+                    <span>{{
+                            DateTime.fromISO(state.account.cpu_limit.last_usage_update_time + 'Z').toRelative()
+                        }}</span>
+                </div>
             </div>
 
             <div v-if="isVoteProducer()" class="border border-surface rounded-md shadow-md p-2 mb-2 md:mx-auto md:w-1/2">
