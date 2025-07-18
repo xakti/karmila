@@ -59,6 +59,7 @@ export function addMapTokens(data) {
     let key = `${data.contract}-${data.code}`;
     mapTokens[key] = data;
 }
+
 export function intoMapTokens(rows) {
     rows.forEach(it => {
         let key = `${it.contract}-${it.code}`;

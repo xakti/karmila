@@ -4,6 +4,7 @@ import {client, endpointHyperion} from "./nodes.js";
 
 const ChainInfo = Object.create(null);
 
+ChainInfo.SYSTEM_CONTRACT = "vexcore";
 ChainInfo.vexPrice = ref(0);
 ChainInfo.usdtPrice = ref(0);
 ChainInfo.vexcoreGlobal = reactive({max_ram_size:0, total_unpaid_blocks:0});

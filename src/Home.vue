@@ -22,7 +22,7 @@
             </template>
             <div class="flex w-full">
                 <div v-if="Wallet.isConnected()" class="inline-flex gap-4 mb-4 items-center border border-surface rounded-xl shadow-md p-2 mx-auto">
-                    <span class="font-bold text-lg">{{ Wallet.account }}</span>
+                    <span class="font-bold text-lg"><i class="pi pi-user"/> {{ Wallet.account }}</span>
                     <Button size="small" rounded raised text icon="pi pi-power-off" @click="closeWallet"></Button>
                 </div>
                 <Button v-else class="mx-auto mb-2" label="Login" @click="showWalletSelector"></Button>
@@ -53,11 +53,11 @@
 <script setup>
 import {onActivated, reactive, ref} from "vue";
 import {onBeforeRouteLeave, useRouter} from "vue-router";
-import {startInterval} from "@/js/utils.js";
-import {completeAccount, suggestions} from "@/js/auto.js";
-import ChainInfo from "@/components/ChainInfo.vue";
-import LatestAction from "@/components/LatestAction.vue";
-import Wallet from "@/js/wallet.js";
+import ChainInfo from "./components/ChainInfo.vue";
+import LatestAction from "./components/LatestAction.vue";
+import {startInterval} from "./js/utils.js";
+import {completeAccount, suggestions} from "./js/auto.js";
+import Wallet from "./js/wallet.js";
 
 const router = useRouter();
 const state = reactive({query: "", drawer: false});
@@ -72,6 +72,7 @@ const queryLabel = ref(labels[0]);
 const menuItems = [
     {label: "Tokens", command: () => openPage('/tokens')},
     {label: "Producers", command: () => openPage('/producers')},
+    {label: "Rex", command: () => openPage('/rex')},
     {label: "Newborn", command: () => openPage('/newborn')},
     {label: "Name Bids", command: () => openPage('/namebids')},
     {label: "Table Viewer", command: () => openPage('/table')},
