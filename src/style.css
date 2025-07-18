@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tailwindcss-primeui";
+
 @custom-variant dark (&:where(.ui-dark, .ui-dark *));
 
 /* Vue transition */
@@ -84,4 +85,9 @@
 
 .scale-slide-leave-to {
     transform: scale(0.8);
+}
+
+.login-dialog {
+    @apply rounded-xl;
+    background-image: linear-gradient(to bottom, #89f7fe, #66a6ff);
 }
