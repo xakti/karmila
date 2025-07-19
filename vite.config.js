@@ -5,29 +5,47 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 import tailwindcss from '@tailwindcss/vite'
 import Components from 'unplugin-vue-components/vite'
 import {PrimeVueResolver} from '@primevue/auto-import-resolver'
-import {NodeGlobalsPolyfillPlugin} from "@esbuild-plugins/node-globals-polyfill"
+import {VitePWA} from 'vite-plugin-pwa'
+
 
 // https://vite.dev/config/
 export default defineConfig({
     plugins: [
-        vue(),
-        vueDevTools(),
-        tailwindcss(),
-        Components({resolvers: [PrimeVueResolver()]})
+        vue(), vueDevTools(), tailwindcss(),
+        Components({resolvers: [PrimeVueResolver()]}),
+        VitePWA({
+            registerType: 'autoUpdate',
+            manifest: {
+                name: 'Karmila - Vexanium Explorer',
+                short_name: 'Karmila',
+                start_url: '/',
+                display: 'standalone',
+                background_color: '#e0f7fa',
+                theme_color: '#e0f7fa',
+                icons: [
+                    {
+                        src: 'icon-192.png',
+                        sizes: '192x192',
+                        type: 'image/png',
+                    },
+                    {
+                        src: 'icon-512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                    },
+                    {
+                        src: 'maskable-icon-512.png',
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable any',
+                    },
+                ],
+            }
+        })
     ],
-    optimizeDeps: {
-        esbuildOptions: {
-            define: {
-                global: 'globalThis'
-            },
-            plugins: [
-                NodeGlobalsPolyfillPlugin({process: true, buffer: true})
-            ]
-        }
-    },
     build: {
         emptyOutDir: true,
-        chunkSizeWarningLimit: 900,
+        chunkSizeWarningLimit: 1000,
         rollupOptions: {
             output: {
                 manualChunks: {
@@ -41,8 +59,7 @@ export default defineConfig({
     resolve: {
         alias: {
             '@': fileURLToPath(new URL('./src', import.meta.url)),
-            buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6',
-            event: 'rollup-plugin-node-polyfills/polyfills/events'
+            buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6'
         },
     },
     define: {

@@ -1,31 +1,28 @@
 <template>
     <div id="setting" class="p-2">
 
-        <Card class="drop-shadow md:w-1/2 md:mx-auto">
-            <template #title>
-                <span class="font-bold text-xl">Setting</span>
-                <div class="float-right">
-                    <transition mode="out-in" name="fade">
-                        <i v-if="dark" class="pi pi-moon cursor-pointer" @click="onDark"></i>
-                        <i v-else class="pi pi-sun cursor-pointer" @click="onDark"></i>
-                    </transition>
-                </div>
-            </template>
-            <template #content>
-                <span class="font-bold text-lg">Nodes</span>
-                <div class="flex flex-col">
-                    <div v-for="(it,key,n) in listNodes" :key="n" class="flex justify-between">
-                        <div class="inline-flex gap-2 items-center">
-                            <RadioButton @update:model-value="onNode" v-model="node" name="node" :value="key"/>
-                            {{ it.name }}
-                            <Tag v-if="it.hyperion" value="hyperion" class="cursor-pointer select-none"
-                                 :icon="isCurrentHyperion(key)" @click="setHyperion(key)"></Tag>
-                        </div>
-                        <span>{{ it.speed }}</span>
+        <div class="border border-surface rounded-md shadow-md flex flex-col gap-2 p-2 md:w-1/2 md:mx-auto animate-zoomin">
+            <div class="inline-flex justify-between items-center">
+                <span class="font-bold text-xl">Settings</span>
+                <transition mode="out-in" name="fade">
+                    <i v-if="dark" class="pi pi-moon cursor-pointer" @click="onDark"></i>
+                    <i v-else class="pi pi-sun cursor-pointer" @click="onDark"></i>
+                </transition>
+            </div>
+            <span class="font-bold text-lg">RPC Nodes</span>
+            <div class="flex flex-col">
+                <div v-for="(it,key,n) in listNodes" :key="n" class="flex justify-between">
+                    <div class="inline-flex gap-2 items-center">
+                        <RadioButton @update:model-value="onNode" v-model="node" name="node" :value="key"/>
+                        {{ it.name }}
+                        <Tag v-if="it.hyperion" value="hyperion" class="cursor-pointer select-none"
+                             :icon="isCurrentHyperion(key)" @click="setHyperion(key)"></Tag>
                     </div>
+                    <span>{{ it.speed }}</span>
                 </div>
-            </template>
-        </Card>
+            </div>
+        </div>
+
     </div>
 </template>
 <script setup>
