@@ -2,42 +2,38 @@
     <div id="transaction">
 
         <template v-if="ready">
-            <Card class="m-2 drop-shadow md:w-1/2 md:mx-auto">
-                <template #title>
-                    <div class="inline-flex items-center gap-2 mb-1">
-                        <span>Transaction</span>
-                        <Button v-if="isPending()" rounded size="small" :label="`${pending}s`">
-                            <template #icon><i class="pi pi-hourglass animate-spin"></i></template>
-                        </Button>
-                        <Button v-else rounded size="small" label="Irreversible" icon="pi pi-lock"></Button>
-                        <Button rounded size="small" icon="pi pi-download" @click="doDownload"></Button>
+            <div class="border border-surface rounded-md shadow-md p-2 mt-2 md:w-1/2 md:mx-auto">
+                <div class="inline-flex items-center gap-2 mb-1">
+                    <span class="font-bold text-lg">Transaction</span>
+                    <Button v-if="isPending()" rounded size="small" :label="`${pending}s`">
+                        <template #icon><i class="pi pi-hourglass animate-spin"></i></template>
+                    </Button>
+                    <Button v-else rounded size="small" label="Irreversible" icon="pi pi-lock"></Button>
+                    <Button rounded size="small" icon="pi pi-download" @click="doDownload"></Button>
+                </div>
+                <p class="text-sm truncate">{{ trx.trx_id }}</p>
+                <div class="flex flex-col">
+                    <span>Block number:
+                        <router-link class="text-primary-400" :to="`/block/${trx.actions[0].block_num}`">
+                            {{ trx.actions[0].block_num }}
+                        </router-link>
+                    </span>
+                    <span>Block time: {{
+                            DateTime.fromISO(trx.actions[0].timestamp + 'Z').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
+                        }}</span><br>
+                    <div class="flex flex-wrap justify-between">
+                        <Fieldset legend="Usage" class="size-fit">
+                            <div><span class="text-green-400 font-semibold text-lg">CPU</span> {{ usage.cpu }} µs
+                            </div>
+                            <div><span class="text-cyan-500 font-semibold text-lg">NET</span> {{ usage.net }} bytes
+                            </div>
+                        </Fieldset>
+                        <Fieldset legend="Producer" class="size-fit text-center">
+                            <Button link as="router-link" :to="`/producer/${producer}`">{{ producer }}</Button>
+                        </Fieldset>
                     </div>
-                    <p class="text-sm truncate">{{ trx.trx_id }}</p>
-                </template>
-                <template #content>
-                    <div class="flex flex-col">
-                        <span>Block number:
-                            <router-link class="text-primary-400" :to="`/block/${trx.actions[0].block_num}`">
-                                {{ trx.actions[0].block_num }}
-                            </router-link>
-                        </span>
-                        <span>Block time: {{
-                                DateTime.fromISO(trx.actions[0].timestamp + 'Z').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
-                            }}</span><br>
-                        <div class="flex flex-wrap justify-between">
-                            <Fieldset legend="Usage" class="size-fit">
-                                <div><span class="text-green-400 font-semibold text-lg">CPU</span> {{ usage.cpu }} µs
-                                </div>
-                                <div><span class="text-cyan-500 font-semibold text-lg">NET</span> {{ usage.net }} bytes
-                                </div>
-                            </Fieldset>
-                            <Fieldset legend="Producer" class="size-fit text-center">
-                                <Button link as="router-link" :to="`/producer/${producer}`">{{ producer }}</Button>
-                            </Fieldset>
-                        </div>
-                    </div>
-                </template>
-            </Card>
+                </div>
+            </div>
 
             <div class="m-2 p-1 border border-surface rounded-md shadow-md">
                 <DataTable :value="trx.actions" size="small" resizable-columns scrollable scroll-height="400px">

@@ -2,28 +2,27 @@
     <div id="block">
 
         <template v-if="ready">
-            <Card class="drop-shadow m-2 md:w-1/2 md:mx-auto">
-                <template #content>
-                    <div class="inline-flex items-center gap-2 mb-1">
-                        <span class="font-bold text-lg">Block {{ route.params.number }}</span>
-                        <Button v-if="isPending()" rounded size="small" :label="`${pending}s`">
-                            <template #icon><i class="pi pi-hourglass animate-spin"></i></template>
-                        </Button>
-                        <Button v-else rounded size="small" label="Irreversible" icon="pi pi-lock"></Button>
-                        <Button rounded size="small" icon="pi pi-download" @click="doDownload"></Button>
-                    </div>
-                    <p class="truncate">Block ID: {{ block.id }}</p>
-                    <p>Producer:
-                        <router-link class="text-primary-400" :to="`/producer/${block.producer}`">
-                            {{ block.producer }}
-                        </router-link>
-                    </p>
-                    <span>Time:
+            <div class="border border-surface rounded-md shadow-md p-2 mt-2 md:w-1/2 md:mx-auto">
+                <div class="inline-flex items-center gap-2 mb-1">
+                    <span class="font-bold text-lg">Block {{ route.params.number }}</span>
+                    <Button v-if="isPending()" rounded size="small" :label="`${pending}s`">
+                        <template #icon><i class="pi pi-hourglass animate-spin"></i></template>
+                    </Button>
+                    <Button v-else rounded size="small" label="Irreversible" icon="pi pi-lock"></Button>
+                    <Button rounded size="small" icon="pi pi-download" @click="doDownload"></Button>
+                </div>
+                <p class="truncate">Block ID: {{ block.id }}</p>
+                <p>Producer:
+                    <router-link class="text-primary-400" :to="`/producer/${block.producer}`">
+                        {{ block.producer }}
+                    </router-link>
+                </p>
+                <span>Time:
                     {{
-                            DateTime.fromISO(block.timestamp + 'Z').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
-                        }}</span>
-                </template>
-            </Card>
+                        DateTime.fromISO(block.timestamp + 'Z').toLocaleString(DateTime.DATETIME_SHORT_WITH_SECONDS)
+                    }}</span>
+            </div>
+
             <div class="m-2 p-1 border border-surface rounded-md shadow-md">
                 <DataTable :value="block.transactions" size="small" scrollable scroll-height="400px"
                            :data-key="it => it.id"
