@@ -128,3 +128,25 @@ export function getErrorMessage(error) {
     }
     return msg;
 }
+
+export function toBoolean(value) {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") return value !== 0;
+    if (typeof value === "string") {
+        switch (value.trim().toLowerCase()) {
+            case "true":
+            case "1":
+            case "yes":
+            case "on":
+                return true;
+            case "false":
+            case "0":
+            case "no":
+            case "off":
+                return false;
+            default:
+                return false; // fallback
+        }
+    }
+    return false; // kalau tipe lain (null, undefined, object, dll)
+}

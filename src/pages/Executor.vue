@@ -37,11 +37,11 @@ import {onActivated, reactive, ref} from "vue";
 import {useRoute} from "vue-router";
 import {useToast} from "primevue";
 import {PlaceholderAuth} from "@wharfkit/signing-request";
-import {abiCache} from "@/js/nodes.js";
-import {completeContract, suggestions} from "@/js/auto.js";
-import Wallet from "@/js/wallet.js";
-import {copyToClipboard, getErrorMessage} from "@/js/utils.js";
 import {ABI, Action} from "@wharfkit/antelope";
+import {abiCache} from "../js/nodes.js";
+import {completeContract, suggestions} from "../js/auto.js";
+import Wallet from "../js/wallet.js";
+import {copyToClipboard, getErrorMessage, toBoolean} from "../js/utils.js";
 
 const route = useRoute();
 const toast = useToast();
@@ -107,10 +107,18 @@ function onAction(action) {
     state.fields = abi.getStruct(action.type).fields;
 }
 
+function parseData() {
+    state.fields.forEach(it => {
+        if (it.type === "bool") {
+            data[it.name] = toBoolean(data[it.name]);
+        }
+    });
+}
 
 async function run() {
     state.loading = true;
     try {
+        parseData();
         const abi = await abiCache.getAbi(state.contract);
         const action = Action.from({
             account: state.contract, name: state.action,
