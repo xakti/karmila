@@ -1,23 +1,27 @@
 <template>
-    <div id="newborn" class="p-2">
+    <div id="vex-guardian" class="p-2">
 
         <div v-if="ready" class="border rounded-md shadow-md border-surface p-1 md:w-2/3 mx-auto">
             <DataTable :value="newborn" size="small" resizable-columns scrollable scroll-height="500px">
                 <template #header>
-                    <span class="font-bold text-lg">Newborn</span>
+                    <span class="font-bold text-lg">Vex Guardians</span>
+                    <p>Mereka yang menjaga keamanan dan desentralisasi jaringan</p>
                 </template>
                 <Column header="Account">
                     <template #body="{data}">
-                        <router-link class="text-primary-400" :to="`/account/${getName(data.data)}`">
-                            {{ getName(data.data) }}
+                        <router-link class="text-primary-400" :to="`/account/${data.data.voter}`">
+                            {{ data.data.voter }}
                         </router-link>
                     </template>
                 </Column>
-                <Column header="Creator">
+                <Column header="Producers">
                     <template #body="{data}">
-                        <router-link class="text-primary-400" :to="`/account/${data.data.creator}`">
-                            {{ data.data.creator }}
-                        </router-link>
+                        <div class="flex flex-wrap gap-2">
+                            <router-link v-for="(it,n) of data.data.producers" :key="n" class="text-primary-400"
+                                         :to="`/account/${it}`">
+                                {{ it }}
+                            </router-link>
+                        </div>
                     </template>
                 </Column>
                 <Column header="Time"
@@ -48,13 +52,8 @@ onActivated(() => {
     fetchNewAccount();
 });
 
-function getName(data) {
-    // beda nama field pada versi hyperion
-    return (data.hasOwnProperty("name")) ? data.name : data.newact;
-}
-
 async function fetchNewAccount() {
-    let url = `${endpointHyperion}/v2/history/get_actions?account=vexcore&act.name=newaccount&simple=true&limit=20`;
+    let url = `${endpointHyperion}/v2/history/get_actions?account=vexcore&act.name=voteproducer&simple=true&limit=50`;
     try {
         let res = await fetch(url);
         if (res.ok) {

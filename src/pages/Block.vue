@@ -1,8 +1,8 @@
 <template>
-    <div id="block">
+    <div id="block" class="p-2">
 
         <template v-if="ready">
-            <div class="border border-surface rounded-md shadow-md p-2 mt-2 md:w-1/2 md:mx-auto">
+            <div class="border border-surface rounded-md shadow-md p-2 md:w-1/2 md:mx-auto">
                 <div class="inline-flex items-center gap-2 mb-1">
                     <span class="font-bold text-lg">Block {{ route.params.number }}</span>
                     <Button v-if="isPending()" rounded size="small" :label="`${pending}s`">
@@ -23,7 +23,7 @@
                     }}</span>
             </div>
 
-            <div class="m-2 p-1 border border-surface rounded-md shadow-md">
+            <div class="mt-2 p-1 border border-surface rounded-md shadow-md">
                 <DataTable :value="block.transactions" size="small" scrollable scroll-height="400px"
                            :data-key="it => it.id"
                            resizable-columns

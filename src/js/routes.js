@@ -4,6 +4,7 @@ import Newborn from "../pages/Newborn.vue";
 import BidName from "../pages/BidName.vue";
 import TableViewer from "../pages/TableViewer.vue";
 import Rex from "../pages/Rex.vue";
+import VexGuardian from "../pages/VexGuardian.vue";
 
 import Account from "../pages/Account.vue";
 import ListToken from "../pages/ListToken.vue";
@@ -23,6 +24,7 @@ const routes = [
     {path: '/namebids', component: BidName},
     {path: '/table', component: TableViewer},
     {path: '/rex', component: Rex},
+    {path: '/vex-guardian', component: VexGuardian},
 
     {path: '/account/:name', component: Account},
     {path: '/tokens', component: ListToken},

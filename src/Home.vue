@@ -74,6 +74,7 @@ const menuItems = [
     {label: "Producers", command: () => openPage('/producers')},
     {label: "Rex", command: () => openPage('/rex')},
     {label: "Newborn", command: () => openPage('/newborn')},
+    {label: "VEX Guardians", command: () => openPage('/vex-guardian')},
     {label: "Name Bids", command: () => openPage('/namebids')},
     {label: "Table Viewer", command: () => openPage('/table')},
     {label: "Executor", command: () => openPage('/executor')},
