@@ -2,11 +2,11 @@
     <div id="rex-fund" class="border border-surface rounded-md shadow-md p-2 flex flex-col">
         <span class="font-bold text-xl">Overview</span>
         <div class="inline-flex justify-between">
-            <span>REX total:</span>
+            <span>REX Total:</span>
             <span>{{ Rex.pool.total_rex }}</span>
         </div>
         <div class="inline-flex justify-between">
-            <span>VEX total:</span>
+            <span>VEX Total:</span>
             <span>{{ Rex.pool.total_lendable }}</span>
         </div>
         <div class="inline-flex justify-between">

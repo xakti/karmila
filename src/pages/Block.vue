@@ -83,7 +83,7 @@ import {DateTime} from "luxon";
 import ActDataView from "../components/ActDataView.vue";
 import {endpointHyperion} from "../js/nodes.js";
 import ChainInfo from "../js/chain-info.js";
-import {startInterval,download} from "../js/utils.js";
+import {startInterval, download} from "../js/utils.js";
 
 const route = useRoute();
 const toast = useToast();
@@ -126,8 +126,12 @@ function countTransaction() {
 async function fetchBlock() {
     try {
         let res = await fetch(`${endpointHyperion}/v1/trace_api/get_block`, {
-            method: "POST", body: JSON.stringify({
-                block_num: route.params.number
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                block_num: parseInt(route.params.number)
             })
         });
         if (res.ok) {

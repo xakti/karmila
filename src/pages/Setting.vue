@@ -10,7 +10,7 @@
                 </transition>
             </div>
             <span class="font-bold text-lg">RPC Nodes</span>
-            <div class="flex flex-col">
+            <div class="flex flex-col gap-1">
                 <div v-for="(it,key,n) in listNodes" :key="n" class="flex justify-between">
                     <div class="inline-flex gap-2 items-center">
                         <RadioButton @update:model-value="onNode" v-model="node" name="node" :value="key"/>

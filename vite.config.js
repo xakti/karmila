@@ -49,7 +49,7 @@ export default defineConfig({
         rollupOptions: {
             output: {
                 manualChunks: {
-                    'wharfkit': ['@wharfkit/antelope', '@wharfkit/contract', '@wharfkit/signing-request', '@wharfkit/abicache', '@wharfkit/account', 'pako'],
+                    'wharfkit': ['@wharfkit/antelope', '@wharfkit/signing-request', '@wharfkit/abicache', 'pako'],
                     'vue': ['vue', 'vue-router'],
                     'gui': ['primevue', 'tailwindcss-primeui', 'tailwindcss', '@primeuix/themes'],
                 }
@@ -57,10 +57,12 @@ export default defineConfig({
         },
     },
     resolve: {
-        alias: {
-            '@': fileURLToPath(new URL('./src', import.meta.url)),
-            buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6'
-        },
+        alias: [
+            { find: "@", replacement: fileURLToPath(new URL('./src', import.meta.url)) },
+            { find: "buffer", replacement: 'rollup-plugin-node-polyfills/polyfills/buffer-es6' },
+            // '@': fileURLToPath(new URL('./src', import.meta.url)),
+            // buffer: 'rollup-plugin-node-polyfills/polyfills/buffer-es6'
+        ],
     },
     define: {
         global: 'globalThis'

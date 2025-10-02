@@ -18,7 +18,7 @@
                     <template #body="{data}">
                         <div class="flex flex-wrap gap-2">
                             <router-link v-for="(it,n) of data.data.producers" :key="n" class="text-primary-400"
-                                         :to="`/account/${it}`">
+                                         :to="`/producer/${it}`">
                                 {{ it }}
                             </router-link>
                         </div>

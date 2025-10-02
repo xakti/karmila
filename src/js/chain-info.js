@@ -7,17 +7,26 @@ const ChainInfo = Object.create(null);
 ChainInfo.SYSTEM_CONTRACT = "vexcore";
 ChainInfo.vexPrice = ref(0);
 ChainInfo.usdtPrice = ref(0);
-ChainInfo.vexcoreGlobal = reactive({max_ram_size:0, total_unpaid_blocks:0});
+ChainInfo.vexcoreGlobal = reactive({max_ram_size: 0, total_unpaid_blocks: 0});
 ChainInfo.chainInfo = reactive({head_block_num: 0, head_block_producer: "", last_irreversible_block_num: 0});
 ChainInfo.actions = ref([]);
 ChainInfo.actionUsage = reactive({ready: false, data: {tx_count: 0, action_count: 0, unique_actors: 0}});
 ChainInfo.ramPrice = ref(0);
 
 ChainInfo.fetchVexPrice = async function () {
-    let res = await fetch('https://indodax.com/api/ticker/vexidr');
-    if (res.ok) {
-        res = await res.json();
-        ChainInfo.vexPrice.value = res.ticker.last;
+    let args = {
+        "json": true,
+        "code": "vexpriceinfo",
+        "scope": "vexpriceinfo",
+        "table": "priceinfo",
+        "lower_bound": 100,
+        "key_type": "i64",
+        "limit": 1
+    };
+    let res = await client.v1.chain.get_table_rows(args);
+    if (res.rows.length > 0) {
+        let data = res.rows[0];
+        ChainInfo.vexPrice.value = data.price;
     }
 }
 ChainInfo.getChainInfo = async function () {

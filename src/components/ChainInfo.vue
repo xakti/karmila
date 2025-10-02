@@ -76,7 +76,7 @@ onBeforeRouteLeave(() => {
 
 async function getVexPrice() {
     await ChainInfo.fetchVexPrice();
-    vexPrice.value = `${ChainInfo.vexPrice.value} IDR`;
+    vexPrice.value = `${ChainInfo.vexPrice.value}`;
 }
 
 async function calculateRam() {
